@@ -407,21 +407,42 @@ def move_battery_to_rack(root, frame):
 
 
 def add_test_track(world):
-    """Threshold 30 mm at x = 2.5 m, ramp 1:12 up, platform, ramp 1:8 down (along +x)."""
+    """Threshold, accessibility ramp and three separate 10/15/30 degree hills."""
     st = dict(contype="2", conaffinity="1", rgba="0.72 0.74 0.78 1", group="0")
+
+    def slope_box(name, xa, xb, za, zb, width=1.2, rgba=None):
+        a = math.atan2(zb - za, xb - xa)
+        L = math.hypot(xb - xa, zb - za)
+        n = np.array([-math.sin(a), 0, math.cos(a)])
+        c = np.array([(xa + xb) / 2, 0, (za + zb) / 2]) - n * 0.025
+        attrs = dict(st)
+        if rgba is not None:
+            attrs["rgba"] = rgba
+        ET.SubElement(world, "geom", name=name, type="box", pos=f(c), size=f(L / 2, width, 0.025),
+                      euler=f(0, -a, 0), **attrs)
+
     ET.SubElement(world, "geom", name="threshold_30mm", type="box", pos="2.5 0 0.015", size="0.03 1.2 0.015",
                   rgba="0.85 0.55 0.2 1", contype="2", conaffinity="1")
     h = 2.0 / 12
     x0 = 5.0
     for name, xa, xb, za, zb in (("ramp_up_1_12", x0, x0 + 2.0, 0.0, h),
                                  ("ramp_down_1_8", x0 + 4.0, x0 + 4.0 + 8 * h, h, 0.0)):
-        a = math.atan2(zb - za, xb - xa)
-        L = math.hypot(xb - xa, zb - za)
-        n = np.array([-math.sin(a), 0, math.cos(a)])
-        c = np.array([(xa + xb) / 2, 0, (za + zb) / 2]) - n * 0.025
-        ET.SubElement(world, "geom", name=name, type="box", pos=f(c), size=f(L / 2, 1.2, 0.025),
-                      euler=f(0, -a, 0), **st)
+        slope_box(name, xa, xb, za, zb)
     ET.SubElement(world, "geom", name="platform", type="box", pos=f(x0 + 3.0, 0, h / 2), size=f(1.0, 1.2, h / 2), **st)
+
+    # Independent up-and-down obstacle hills along +x.  Their 0.1 m rise keeps a
+    # 0.5 km/h ascent inside the five-second automatic traction window.
+    hill_starts = {10: 12.5, 15: 20.5, 30: 26.5}
+    colours = {10: "0.35 0.65 0.38 1", 15: "0.88 0.65 0.22 1", 30: "0.82 0.32 0.25 1"}
+    height, plateau = 0.1, 0.8
+    for deg, start in hill_starts.items():
+        run = height / math.tan(math.radians(deg))
+        top0, top1, end = start + run, start + run + plateau, start + 2 * run + plateau
+        slope_box(f"hill_{deg}_up", start, top0, 0, height, rgba=colours[deg])
+        ET.SubElement(world, "geom", name=f"hill_{deg}_top", type="box",
+                      pos=f((top0 + top1) / 2, 0, height / 2), size=f(plateau / 2, 1.2, height / 2),
+                      rgba=colours[deg], contype="2", conaffinity="1", group="0")
+        slope_box(f"hill_{deg}_down", top1, end, height, 0, rgba=colours[deg])
 
 
 def build(mass=80.0, height=1.75, frame_mat=DEFAULT_FRAME, act=DEFAULT_ACTUATOR, motor=DEFAULT_MOTOR,

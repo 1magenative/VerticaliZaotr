@@ -280,6 +280,15 @@
     <geom name="ramp_up_1_12" type="box" pos="6.00208 0 0.0584197" size="1.00347 1.2 0.025" euler="0 -0.0831412 0" contype="2" conaffinity="1" rgba="0.72 0.74 0.78 1" group="0" />
     <geom name="ramp_down_1_8" type="box" pos="9.66357 0 0.0585264" size="0.671855 1.2 0.025" euler="0 0.124355 0" contype="2" conaffinity="1" rgba="0.72 0.74 0.78 1" group="0" />
     <geom name="platform" type="box" pos="8 0 0.0833333" size="1 1.2 0.0833333" contype="2" conaffinity="1" rgba="0.72 0.74 0.78 1" group="0" />
+    <geom name="hill_10_up" type="box" pos="12.7879 0 0.0253798" size="0.287939 1.2 0.025" euler="0 -0.174533 0" contype="2" conaffinity="1" rgba="0.35 0.65 0.38 1" group="0" />
+    <geom name="hill_10_top" type="box" pos="13.4671 0 0.05" size="0.4 1.2 0.05" rgba="0.35 0.65 0.38 1" contype="2" conaffinity="1" group="0" />
+    <geom name="hill_10_down" type="box" pos="14.1464 0 0.0253798" size="0.287939 1.2 0.025" euler="0 0.174533 0" contype="2" conaffinity="1" rgba="0.35 0.65 0.38 1" group="0" />
+    <geom name="hill_15_up" type="box" pos="20.6931 0 0.0258519" size="0.193185 1.2 0.025" euler="0 -0.261799 0" contype="2" conaffinity="1" rgba="0.88 0.65 0.22 1" group="0" />
+    <geom name="hill_15_top" type="box" pos="21.2732 0 0.05" size="0.4 1.2 0.05" rgba="0.88 0.65 0.22 1" contype="2" conaffinity="1" group="0" />
+    <geom name="hill_15_down" type="box" pos="21.8533 0 0.0258519" size="0.193185 1.2 0.025" euler="0 0.261799 0" contype="2" conaffinity="1" rgba="0.88 0.65 0.22 1" group="0" />
+    <geom name="hill_30_up" type="box" pos="26.5991 0 0.0283494" size="0.1 1.2 0.025" euler="0 -0.523599 0" contype="2" conaffinity="1" rgba="0.82 0.32 0.25 1" group="0" />
+    <geom name="hill_30_top" type="box" pos="27.0732 0 0.05" size="0.4 1.2 0.05" rgba="0.82 0.32 0.25 1" contype="2" conaffinity="1" group="0" />
+    <geom name="hill_30_down" type="box" pos="27.5473 0 0.0283494" size="0.1 1.2 0.025" euler="0 0.523599 0" contype="2" conaffinity="1" rgba="0.82 0.32 0.25 1" group="0" />
   </worldbody>
   <tendon />
   <equality>
