@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="Vert V5 CAD export - drive">
+  <compiler angle="radian" meshdir="meshes" inertiafromgeom="false" autolimits="true" />
+  <option timestep="0.002" gravity="0 0 -9.80665" integrator="implicitfast" iterations="100" tolerance="1e-10" />
+  <default>
+    <joint damping="0.15" armature="0.002" />
+    <geom condim="3" friction="0.8 0.005 0.0001" solref="0.008 1" />
+  </default>
+  <visual>
+    <global azimuth="140" elevation="-20" />
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.35 0.35 0.35" />
+  </visual>
+  <asset>
+    <mesh name="V5_ActCyl_00" file="V5_ActCyl_00.stl" inertia="shell" />
+    <mesh name="V5_Seat_00" file="V5_Seat_00.stl" inertia="shell" />
+    <mesh name="V5_Frame_00" file="V5_Frame_00.stl" inertia="shell" />
+    <mesh name="V5_Frame_01" file="V5_Frame_01.stl" inertia="shell" />
+    <mesh name="V5_Frame_02" file="V5_Frame_02.stl" inertia="shell" />
+    <mesh name="V5_Frame_03" file="V5_Frame_03.stl" inertia="shell" />
+    <mesh name="V5_Back_00" file="V5_Back_00.stl" inertia="shell" />
+    <mesh name="V5_Back_01" file="V5_Back_01.stl" inertia="shell" />
+    <mesh name="V5_ActRod_00" file="V5_ActRod_00.stl" inertia="shell" />
+    <mesh name="Motor150_Left_00" file="Motor150_Left_00.stl" inertia="shell" />
+    <mesh name="DriveHub_Right_00" file="DriveHub_Right_00.stl" inertia="shell" />
+    <mesh name="BatteryHoldDown_00" file="BatteryHoldDown_00.stl" inertia="shell" />
+    <mesh name="BatteryHoldDown_01" file="BatteryHoldDown_01.stl" inertia="shell" />
+    <mesh name="Motor150_Right_00" file="Motor150_Right_00.stl" inertia="shell" />
+    <mesh name="BatteryTray_00" file="BatteryTray_00.stl" inertia="shell" />
+    <mesh name="MotorMount_Right_00" file="MotorMount_Right_00.stl" inertia="shell" />
+    <mesh name="MotorMount_Left_00" file="MotorMount_Left_00.stl" inertia="shell" />
+    <mesh name="DriveHub_Left_00" file="DriveHub_Left_00.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Right_00" file="MotorFasteners_Right_00.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Right_01" file="MotorFasteners_Right_01.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Right_02" file="MotorFasteners_Right_02.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Right_03" file="MotorFasteners_Right_03.stl" inertia="shell" />
+    <mesh name="V5_LinkLower_00" file="V5_LinkLower_00.stl" inertia="shell" />
+    <mesh name="V5_LinkLower_01" file="V5_LinkLower_01.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Left_00" file="MotorFasteners_Left_00.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Left_01" file="MotorFasteners_Left_01.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Left_02" file="MotorFasteners_Left_02.stl" inertia="shell" />
+    <mesh name="MotorFasteners_Left_03" file="MotorFasteners_Left_03.stl" inertia="shell" />
+    <mesh name="Battery_24V_20Ah_00" file="Battery_24V_20Ah_00.stl" inertia="shell" />
+  </asset>
+  <worldbody>
+    <light pos="0 -3 5" dir="0 1 -2" />
+    <geom name="floor" type="plane" size="8 8 0.1" rgba="0.89 0.9 0.92 1" contype="2" conaffinity="1" />
+    <body name="frame" pos="0 0 0.003">
+      <freejoint name="chassis_free" />
+      <inertial mass="36.8" pos="0.2003581549 -1.008870309e-17 0.1614099432" diaginertia="2.155023333 4.524943333 4.652133333" />
+      <geom name="V5_Frame_00" mesh="V5_Frame_00" type="mesh" rgba="0.09803921569 0.3764705882 0.8 1" contype="0" conaffinity="0" group="1" />
+      <geom name="V5_Frame_01" mesh="V5_Frame_01" type="mesh" rgba="0.09803921569 0.3764705882 0.8 1" contype="0" conaffinity="0" group="1" />
+      <geom name="V5_Frame_02" mesh="V5_Frame_02" type="mesh" rgba="0.09803921569 0.3764705882 0.8 1" contype="0" conaffinity="0" group="1" />
+      <geom name="V5_Frame_03" mesh="V5_Frame_03" type="mesh" rgba="0.09803921569 0.3764705882 0.8 1" contype="0" conaffinity="0" group="1" />
+      <body name="Motor150_Left">
+        <inertial mass="1.7" pos="-3.907048698e-19 0.1559167351 0.192352421" diaginertia="0.008156033333 0.005489124333 0.006925624333" />
+        <geom name="Motor150_Left_00" mesh="Motor150_Left_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="BatteryHoldDown">
+        <inertial mass="0.5" pos="0.23 -3.22517038e-17 0.1548913415" diaginertia="0.001839083333 0.001888708333 0.003283708333" />
+        <geom name="BatteryHoldDown_00" mesh="BatteryHoldDown_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="BatteryHoldDown_01" mesh="BatteryHoldDown_01" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="Motor150_Right">
+        <inertial mass="1.7" pos="9.412039223e-19 -0.1559167351 0.192352421" diaginertia="0.008156033333 0.005489124333 0.006925624333" />
+        <geom name="Motor150_Right_00" mesh="Motor150_Right_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="BatteryTray">
+        <inertial mass="2.1" pos="0.2227228281 -8.300825562e-17 0.09287338598" diaginertia="0.0357728 0.012656 0.0446432" />
+        <geom name="BatteryTray_00" mesh="BatteryTray_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="MotorMount_Right">
+        <inertial mass="0.8" pos="0.03902787541 -0.1788404923 0.1572510717" diaginertia="0.0016956 0.003967266667 0.002541666667" />
+        <geom name="MotorMount_Right_00" mesh="MotorMount_Right_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="MotorMount_Left">
+        <inertial mass="0.8" pos="0.03902787541 0.1788404923 0.1572510717" diaginertia="0.0016956 0.003967266667 0.002541666667" />
+        <geom name="MotorMount_Left_00" mesh="MotorMount_Left_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="MotorFasteners_Right">
+        <inertial mass="0.12" pos="0 -0.1940289532 0.16" diaginertia="5.101e-05 0.0001596436 0.0001586336" />
+        <geom name="MotorFasteners_Right_00" mesh="MotorFasteners_Right_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Right_01" mesh="MotorFasteners_Right_01" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Right_02" mesh="MotorFasteners_Right_02" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Right_03" mesh="MotorFasteners_Right_03" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="MotorFasteners_Left">
+        <inertial mass="0.12" pos="-0.0005908015062 0.1932485207 0.1602259279" diaginertia="5.101e-05 0.0001596436 0.0001586336" />
+        <geom name="MotorFasteners_Left_00" mesh="MotorFasteners_Left_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Left_01" mesh="MotorFasteners_Left_01" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Left_02" mesh="MotorFasteners_Left_02" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+        <geom name="MotorFasteners_Left_03" mesh="MotorFasteners_Left_03" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="Battery_24V_20Ah">
+        <inertial mass="5.8" pos="0.2199395922 -5.914076344e-05 0.1270300719" diaginertia="0.02278544017 0.03177241933 0.04669302083" />
+        <geom name="Battery_24V_20Ah_00" mesh="Battery_24V_20Ah_00" type="mesh" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <geom name="battery_contact" type="box" pos="0.22 0 0.127" size="0.12 0.0925 0.045" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
+      <body name="seat" pos="0.65 0 0.55">
+        <joint name="lift_angle" axis="0 1 0" range="0 1.308996939" damping="5" />
+        <inertial mass="9" pos="-0.2249083209 0 0.01544254764" diaginertia="0.23337075 0.17431875 0.404652" />
+        <geom name="V5_Seat_00" mesh="V5_Seat_00" type="mesh" rgba="0.2784313725 0.6588235294 0.2470588235 1" contype="0" conaffinity="0" group="1" />
+        <site name="seat_actuator_tip" pos="-0.3 0 0" size="0.005" rgba="1 0.5 0 1" group="4" />
+        <body name="back" pos="-0.44 0 0">
+          <joint name="back_compensation" axis="0 1 0" range="-1.308996939 0" damping="0.8" />
+          <inertial mass="6" pos="-0.03919140389 -3.692407159e-17 0.2460133156" diaginertia="0.4691907477 0.3133726617 0.169081914" />
+          <geom name="V5_Back_00" mesh="V5_Back_00" type="mesh" rgba="0.2784313725 0.6588235294 0.2470588235 1" contype="0" conaffinity="0" group="1" />
+          <geom name="V5_Back_01" mesh="V5_Back_01" type="mesh" rgba="0.2784313725 0.6588235294 0.2470588235 1" contype="0" conaffinity="0" group="1" />
+          <site name="back_lower_pin" pos="0 0 -0.25" size="0.005" group="4" />
+        </body>
+      </body>
+      <body name="lower_link" pos="0.65 0 0.3">
+        <joint name="lower_angle" axis="0 1 0" range="0 1.308996939" damping="1" />
+        <inertial mass="4" pos="-0.22 -3.189442277e-17 0" diaginertia="0.1033453333 0.0771 0.1798453333" />
+        <geom name="V5_LinkLower_00" mesh="V5_LinkLower_00" type="mesh" rgba="0.4980392157 0.5294117647 0.568627451 1" contype="0" conaffinity="0" group="1" />
+        <geom name="V5_LinkLower_01" mesh="V5_LinkLower_01" type="mesh" rgba="0.4980392157 0.5294117647 0.568627451 1" contype="0" conaffinity="0" group="1" />
+        <site name="lower_back_pin" pos="-0.44 0 0" size="0.005" group="4" />
+      </body>
+      <body name="actuator_cylinder" pos="0.45 0 0.1">
+        <joint name="actuator_pivot" axis="0 1 0" range="-0.2 1.4" damping="0.5" />
+        <inertial mass="5" pos="-0.042354296 1.415287221e-17 0.190594332" diaginertia="0.07830098039 0.08567156863 0.009453921569" />
+        <geom name="V5_ActCyl_00" mesh="V5_ActCyl_00" type="mesh" rgba="0.9490196078 0.4666666667 0.05882352941 1" contype="0" conaffinity="0" group="1" />
+        <body name="actuator_rod" pos="-0.1 0 0.45">
+          <joint name="actuator_extension" type="slide" axis="-0.2169304578 0 0.9761870602" range="0 0.2888505495" damping="20" />
+          <inertial mass="2" pos="0.0455809878 7.67370186e-17 -0.2051144451" diaginertia="0.03235312941 0.03488647059 0.002725341176" />
+          <geom name="V5_ActRod_00" mesh="V5_ActRod_00" type="mesh" rgba="0.7490196078 0.768627451 0.8 1" contype="0" conaffinity="0" group="1" />
+          <site name="rod_tip" pos="0 0 0" size="0.005" group="4" />
+        </body>
+      </body>
+      <body name="drive_right" pos="0 -0.2625 0.16">
+        <joint name="drive_right_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="3.65" pos="0 0 0" diaginertia="0.02516625 0.04256 0.02516625" />
+        <geom name="drive_right_contact" type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+        <geom mesh="DriveHub_Right_00" type="mesh" pos="-0 0.2625 -0.16" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="drive_left" pos="0 0.2625 0.16">
+        <joint name="drive_left_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="3.65" pos="0 0 0" diaginertia="0.02516625 0.04256 0.02516625" />
+        <geom name="drive_left_contact" type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+        <geom mesh="DriveHub_Left_00" type="mesh" pos="-0 -0.2625 -0.16" rgba="0.7921568627 0.8196078431 0.9333333333 1" contype="0" conaffinity="0" group="1" />
+      </body>
+      <body name="front_right" pos="0.75 -0.26 0.1">
+        <joint name="front_right_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="1" pos="0 0 0" diaginertia="0.002633333333 0.005 0.002633333333" />
+        <geom name="front_right_contact" type="cylinder" size="0.1 0.02" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+      </body>
+      <body name="front_left" pos="0.75 0.26 0.1">
+        <joint name="front_left_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="1" pos="0 0 0" diaginertia="0.002633333333 0.005 0.002633333333" />
+        <geom name="front_left_contact" type="cylinder" size="0.1 0.02" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+      </body>
+      <body name="antitip_right" pos="-0.17 -0.16 0.05">
+        <joint name="antitip_right_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="0.2" pos="0 0 0" diaginertia="0.0001316666667 0.00025 0.0001316666667" />
+        <geom name="antitip_right_contact" type="cylinder" size="0.05 0.01" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+      </body>
+      <body name="antitip_left" pos="-0.17 0.16 0.05">
+        <joint name="antitip_left_spin" axis="0 1 0" damping="0.015" />
+        <inertial mass="0.2" pos="0 0 0" diaginertia="0.0001316666667 0.00025 0.0001316666667" />
+        <geom name="antitip_left_contact" type="cylinder" size="0.05 0.01" quat="0.7071067812 0.7071067812 0 0" rgba="0.12 0.13 0.15 1" contype="1" conaffinity="2" />
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <connect name="four_bar_loop" site1="back_lower_pin" site2="lower_back_pin" solref="0.006 1" />
+    <connect name="actuator_loop" site1="rod_tip" site2="seat_actuator_tip" solref="0.006 1" />
+  </equality>
+  <actuator>
+    <position name="lift_servo" joint="actuator_extension" kp="400000" kv="5000" ctrlrange="0 0.2888505495" forcerange="-4000 4000" />
+    <motor name="drive_left_torque" joint="drive_left_spin" ctrlrange="-13.4 13.4" gear="1" />
+    <motor name="drive_right_torque" joint="drive_right_spin" ctrlrange="-13.4 13.4" gear="1" />
+  </actuator>
+  <sensor>
+    <jointpos name="seat_angle" joint="lift_angle" />
+    <jointpos name="actuator_stroke" joint="actuator_extension" />
+  </sensor>
+</mujoco>
