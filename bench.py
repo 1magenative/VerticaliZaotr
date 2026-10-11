@@ -1,7 +1,7 @@
 """Test bench: runs the chair through the standard manoeuvres without a window and prints a report.
 
     python bench.py                         default chair, 80 kg / 1.75 m
-    python bench.py --mass 150 --peak 2.5   heavier user, stronger controller peak
+    python bench.py --mass 150 --motor-amps 6.25 --battery-amps 14   heavier user, controller current limits
     python bench.py --only curb,turn        selected tests (see TESTS below)
 
 The model is built into a temporary file next to this script; chair_human.xml is not touched.
@@ -17,7 +17,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 
 
 def make(a, **over):
-    kw = dict(mass=a.mass, height=a.height, act=a.act, motor=a.motor, peak=a.peak, chair=a.chair)
+    kw = dict(mass=a.mass, height=a.height, act=a.act, motor=a.motor, motor_amps=a.motor_amps,
+              battery_amps=a.battery_amps, chair=a.chair)
     kw.update(over)
     sim = S.Sim(kw.pop("mass"), kw.pop("height"), **kw)
     sim.last_input = float("inf")          # no panel: disable the dead-man timer
@@ -111,17 +112,30 @@ def t_obstacles(a):
     return rows
 
 
+class Amps:
+    """Peak battery and motor currents over a run."""
+    def __init__(self):
+        self.bat = self.mot = 0.0
+
+    def add(self, t):
+        self.bat = max(self.bat, t["battery_A"])
+        self.mot = max(self.mot, t["motor_A_left"], t["motor_A_right"])
+
+    def text(self):
+        return f"; ток батареи до {self.bat:.1f} А, мотора до {self.mot:.1f} А"
+
+
 def t_slopes(a):
     rows = []
     sim = make(a); run(sim, 1.0)
     sim.event({"name": "goto", "where": "ramp"}); run(sim, 1.0)
     sim.cmd.update(level=2, jy=1.0)
-    on_ramp = []
+    on_ramp, amps = [], Amps()
     for _ in range(100):
-        v = run(sim, 0.1)["speed"]
-        if 5.2 < body_x(sim, "frame") < 6.8: on_ramp.append(v)
-    rows.append(("пандус 1:12 вверх (2-я, 0,63 м/с)", f"скорость на подъёме {min(on_ramp):.2f}…{max(on_ramp):.2f} м/с"
-                 if on_ramp else "не доехал"))
+        t = run(sim, 0.1); amps.add(t)
+        if 5.2 < body_x(sim, "frame") < 6.8: on_ramp.append(t["speed"])
+    rows.append(("пандус 1:12 вверх (2-я, 0,63 м/с)", (f"скорость на подъёме {min(on_ramp):.2f}…{max(on_ramp):.2f} м/с"
+                 if on_ramp else "не доехал") + amps.text()))
     sim = make(a); run(sim, 1.0)
     sim.event({"name": "goto", "where": "platform"}); run(sim, 0.5)
     sim.cmd.update(level=2, jy=1.0)
@@ -132,14 +146,14 @@ def t_slopes(a):
         sim = make(a); run(sim, 1.0)
         sim.event({"name": "goto", "where": f"hill{deg}"}); run(sim, 1.0)
         sim.cmd.update(level=2, jy=1.0)
-        warns, top = set(), False
+        warns, top, amps = set(), False, Amps()
         for _ in range(300):
-            t = run(sim, 0.1); warns.update(t["warnings"])
+            t = run(sim, 0.1); warns.update(t["warnings"]); amps.add(t)
             if body_x(sim, "frame") > start + run_ + 0.2:
                 top = True; break
             if abs(t["pitch"]) > 40: break
         z = float(sim.d.xpos[sim.frame][2])
-        res = "въехал" if top else f"не въехал (поднялся на {z:.2f} из {rise:.2f} м)"
+        res = ("въехал" if top else f"не въехал (поднялся на {z:.2f} из {rise:.2f} м)") + amps.text()
         bad = [w for w in sorted(warns) if "упёрлось" in w or "ОПРОКИН" in w or "оторвалось" in w]
         rows.append((f"уклон {deg}° вверх (2-я)", res + (f" [{bad[0]}]" if bad else "")))
     return rows
@@ -188,7 +202,8 @@ def main():
     ap.add_argument("--height", type=float, default=1.75)
     ap.add_argument("--act", default=bh.DEFAULT_ACTUATOR, choices=list(bh.ACTUATORS))
     ap.add_argument("--motor", default=bh.DEFAULT_MOTOR, choices=[k for k in bh.MOTORS if k != "custom"])
-    ap.add_argument("--peak", type=float, default=bh.DEFAULT_PEAK)
+    ap.add_argument("--motor-amps", type=float, default=None, help="controller limit per motor, A (default: rated)")
+    ap.add_argument("--battery-amps", type=float, default=bh.DEFAULT_BATTERY_AMPS, help="battery current limit, A")
     ap.add_argument("--chair", default=bh.DEFAULT_CHAIR, choices=list(bh.CHAIRS))
     ap.add_argument("--only", default=",".join(TESTS))
     a = ap.parse_args()
@@ -197,7 +212,8 @@ def main():
     S.MODEL = pathlib.Path(tmp)
     try:
         print(f"{bh.CHAIRS[a.chair]} · {a.mass:g} кг / {a.height:g} м · {bh.ACTUATORS[a.act]['name']} · "
-              f"{bh.MOTORS[a.motor]['name']} · пик ×{a.peak:g}")
+              f"{bh.MOTORS[a.motor]['name']} · ток мотора ≤{a.motor_amps or bh.MOTORS[a.motor]['I']:g} А, "
+              f"батареи ≤{a.battery_amps:g} А")
         for name in a.only.split(","):
             t0 = time.time()
             for k, v in TESTS[name](a):

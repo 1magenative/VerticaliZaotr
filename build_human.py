@@ -194,6 +194,8 @@ MOTORS = {
 }
 DEFAULT_MOTOR = "N150"
 MOTOR_FIELDS = ("T", "n_rated", "n0", "ratio", "eta", "I0", "I", "mass")
+MOTOR_V = 24.0                   # V, datasheet voltage = controller output at full duty
+DEFAULT_BATTERY_AMPS = 14.0      # A, battery current limit of the whole chair (BMS, fuse, wiring)
 
 
 def motor_profile(key=DEFAULT_MOTOR, params=None):
@@ -209,13 +211,17 @@ def motor_profile(key=DEFAULT_MOTOR, params=None):
     m["w_rated"], m["w0"] = w(m["n_rated"]), w(m["n0"])
     m["v_rated"], m["v0"] = m["w_rated"] * WHEEL_R, m["w0"] * WHEEL_R
     m["kt"] = m["T"] / max(m["I"] - m["I0"], 0.1)              # N*m per A on the motor shaft
+    # armature resistance and back-EMF constant from the two datasheet points (no load, rated):
+    # V = ke * w + R * I  at (n0, I0) and at (n_rated, I)
+    w0m, wrm = m["n0"] * 2 * math.pi / 60, m["n_rated"] * 2 * math.pi / 60
+    m["R"] = MOTOR_V * (w0m - wrm) / max(m["I"] * w0m - m["I0"] * wrm, 1e-6)
+    m["ke"] = (MOTOR_V - m["R"] * m["I0"]) / w0m
     m["key"] = key
     return m
 
 
 WHEEL_TORQUE = motor_profile()["wheel_torque"]                 # 13.4 N*m for the current motor
 WHEEL_FORCE = WHEEL_TORQUE / WHEEL_R
-DEFAULT_PEAK = 3.0               # controller peak current, x rated, for PEAK_TIME s: needed for thresholds and 10 deg ramps
 CASTER_TRAIL = 0.045             # m, caster axle behind the swivel axis
 CASTER_KG, FORK_KG = 1.0, 0.3    # 200 mm caster wheel, fork with stem and bearing
 ANTITIP_GAP = 0.035              # m, anti-tip wheels above the floor: clear in turns and at a 10 deg ramp transition
