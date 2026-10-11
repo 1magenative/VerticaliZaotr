@@ -60,7 +60,7 @@
       <geom type="capsule" size="0.008" fromto="0.14 0.16 0.585 0.14 0.2 0.36" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.008" fromto="0.14 -0.16 0.585 0.14 -0.2 0.36" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom name="belly_guard" type="box" pos="0.30 0 0.17" size="0.12 0.18 0.012" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
-      <inertial mass="14.8" pos="0.338509 0 0.243703" diaginertia="0.174145 0.798825 0.772682" />
+      <inertial mass="14.511" pos="0.328586 0 0.245444" diaginertia="0.169002 0.720643 0.696748" />
       <body name="Motor150_Left">
         <inertial mass="1.7" pos="0.1 0.175 0.15" diaginertia="0.0015 0.006 0.006" />
         <geom type="box" pos="0 0.175 0.16" size="0.05 0.035 0.05" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
@@ -192,7 +192,7 @@
       <body name="drive_left" pos="0 0.2625 0.16">
         <joint name="drive_left_spin" axis="0 1 0" damping="0.015" />
         <inertial mass="3.0" pos="0 0 0" diaginertia="0.0210062 0.0384 0.0210062" />
-        <geom name="drive_left_contact" type="sphere" size="0.16" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0024" solref="0.015 1" />
+        <geom name="drive_left_contact" type="sphere" size="0.16" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0024" solref="0.03 1" solimp="0.8 0.95 0.001 0.5 2" />
         <geom type="cylinder" size="0.105 0.0455" quat="0.7071067812 0.7071067812 0 0" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
         <geom type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
         <site name="drive_left_site" type="sphere" size="0.19" rgba="1 0 0 0.1" group="4" />
@@ -208,7 +208,7 @@
       <body name="drive_right" pos="0 -0.2625 0.16">
         <joint name="drive_right_spin" axis="0 1 0" damping="0.015" />
         <inertial mass="3.0" pos="0 0 0" diaginertia="0.0210062 0.0384 0.0210062" />
-        <geom name="drive_right_contact" type="sphere" size="0.16" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0024" solref="0.015 1" />
+        <geom name="drive_right_contact" type="sphere" size="0.16" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0024" solref="0.03 1" solimp="0.8 0.95 0.001 0.5 2" />
         <geom type="cylinder" size="0.105 0.0455" quat="0.7071067812 0.7071067812 0 0" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
         <geom type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
         <site name="drive_right_site" type="sphere" size="0.19" rgba="1 0 0 0.1" group="4" />
@@ -230,22 +230,6 @@
       <geom type="capsule" size="0.011" fromto="0.745 -0.205 0.33 0.752833 -0.19 0.131456" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.01" fromto="0.752833 -0.19 0.131456 0.752833 0.19 0.131456" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom name="footplate" type="box" pos="0.835833 0 0.150456" size="0.183 0.19 0.006" rgba="0.12 0.12 0.13 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.008" fromto="1.00883 0.16 0.146456 1.00883 0.16 0.063" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
-      <body name="footroller_left" pos="1.00883 0.16 0.063">
-        <joint name="footroller_left_spin" axis="0 1 0" damping="0.005" />
-        <inertial mass="0.1" pos="0 0 0" diaginertia="0.00003 0.00004 0.00003" />
-        <geom name="footroller_left_contact" type="sphere" size="0.028" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
-        <geom type="cylinder" size="0.028 0.012" quat="0.7071067812 0.7071067812 0 0" rgba="0.2 0.2 0.22 1" contype="0" conaffinity="0" group="1" />
-        <site name="footroller_left_site" type="sphere" size="0.058" rgba="1 0 0 0.1" group="4" />
-      </body>
-      <geom type="capsule" size="0.008" fromto="1.00883 -0.16 0.146456 1.00883 -0.16 0.063" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
-      <body name="footroller_right" pos="1.00883 -0.16 0.063">
-        <joint name="footroller_right_spin" axis="0 1 0" damping="0.005" />
-        <inertial mass="0.1" pos="0 0 0" diaginertia="0.00003 0.00004 0.00003" />
-        <geom name="footroller_right_contact" type="sphere" size="0.028" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
-        <geom type="cylinder" size="0.028 0.012" quat="0.7071067812 0.7071067812 0 0" rgba="0.2 0.2 0.22 1" contype="0" conaffinity="0" group="1" />
-        <site name="footroller_right_site" type="sphere" size="0.058" rgba="1 0 0 0.1" group="4" />
-      </body>
       <geom name="shin_pad" type="box" pos="0.815263 0 0.451387" size="0.03 0.17 0.116235" euler="0 -0.17 0" rgba="0.06 0.06 0.07 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.007" fromto="0.845263 0.17 0.451387 0.740211 0.19 0.451387" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.007" fromto="0.845263 -0.17 0.451387 0.740211 -0.19 0.451387" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
@@ -259,7 +243,7 @@
         <body name="front_left" pos="-0.045 0 0">
           <joint name="front_left_spin" axis="0 1 0" damping="0.015" />
           <inertial mass="1.0" pos="0 0 0" diaginertia="0.00270833 0.005 0.00270833" />
-          <geom name="front_left_contact" type="sphere" size="0.1" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0015" solref="0.015 1" />
+          <geom name="front_left_contact" type="sphere" size="0.1" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0015" solref="0.03 1" solimp="0.8 0.95 0.001 0.5 2" />
           <geom type="cylinder" size="0.04 0.028" quat="0.7071067812 0.7071067812 0 0" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
           <geom type="cylinder" size="0.1 0.025" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
           <site name="front_left_site" type="sphere" size="0.13" rgba="1 0 0 0.1" group="4" />
@@ -275,7 +259,7 @@
         <body name="front_right" pos="-0.045 0 0">
           <joint name="front_right_spin" axis="0 1 0" damping="0.015" />
           <inertial mass="1.0" pos="0 0 0" diaginertia="0.00270833 0.005 0.00270833" />
-          <geom name="front_right_contact" type="sphere" size="0.1" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0015" solref="0.015 1" />
+          <geom name="front_right_contact" type="sphere" size="0.1" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" priority="1" condim="6" friction="0.8 0.005 0.0015" solref="0.03 1" solimp="0.8 0.95 0.001 0.5 2" />
           <geom type="cylinder" size="0.04 0.028" quat="0.7071067812 0.7071067812 0 0" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
           <geom type="cylinder" size="0.1 0.025" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
           <site name="front_right_site" type="sphere" size="0.13" rgba="1 0 0 0.1" group="4" />
@@ -310,8 +294,8 @@
   </equality>
   <actuator>
     <intvelocity name="lift_actuator" joint="actuator_extension" gear="200" kp="250" kv="5" ctrlrange="-1 1" actrange="0 60" forcerange="-30 30" />
-    <velocity name="drive_left" joint="drive_left_spin" gear="0.16" kv="1600" ctrlrange="-2.00062 2.00062" forcerange="-83.75 83.75" />
-    <velocity name="drive_right" joint="drive_right_spin" gear="0.16" kv="1600" ctrlrange="-2.00062 2.00062" forcerange="-83.75 83.75" />
+    <velocity name="drive_left" joint="drive_left_spin" gear="0.16" kv="1600" ctrlrange="-1.1133 1.1133" forcerange="-150.5 150.5" />
+    <velocity name="drive_right" joint="drive_right_spin" gear="0.16" kv="1600" ctrlrange="-1.1133 1.1133" forcerange="-150.5 150.5" />
     <damper name="brake_left" joint="drive_left_spin" kv="60" ctrlrange="0 1" />
     <damper name="brake_right" joint="drive_right_spin" kv="60" ctrlrange="0 1" />
   </actuator>
@@ -335,7 +319,5 @@
     <touch name="load_front_right_N" site="front_right_site" />
     <touch name="load_antitip_left_N" site="antitip_left_site" />
     <touch name="load_antitip_right_N" site="antitip_right_site" />
-    <touch name="load_footroller_left_N" site="footroller_left_site" />
-    <touch name="load_footroller_right_N" site="footroller_right_site" />
   </sensor>
 </mujoco>

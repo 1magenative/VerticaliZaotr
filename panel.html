@@ -401,7 +401,7 @@ function render(s){
   $('#hLift').textContent = fmt(s.lift_force)+' Н';
   $('#hTip').textContent = fmt(s.lean_fwd,0)+'° / '+fmt(s.lean_back,0)+'°';
   const ws = s.cmd.estop ? ['АВАРИЙНЫЙ СТОП'].concat(s.warnings) : s.warnings;
-  $('#hudWarn').innerHTML = ws.slice(0,3).map(w=>`<div class="${/ОПРОКИН|оторвал|АВАРИЙ|упёрлось/.test(w)?'bad':''}">${w}</div>`).join('');
+  $('#hudWarn').innerHTML = ws.slice(0,3).map(w=>`<div class="${/ОПРОКИН|оторвал|АВАРИЙ|упёрлось|не удерживают/.test(w)?'bad':''}">${w}</div>`).join('');
 }
 
 // top view

@@ -125,8 +125,13 @@ class Amps:
         return f"; ток батареи до {self.bat:.1f} А, мотора до {self.mot:.1f} А"
 
 
+def level_speed(a, level):
+    return min(bh.motor_profile(a.motor)["v_rated"], S.TOP_SPEED_CAP) * S.LEVEL_FRACTIONS[level - 1]
+
+
 def t_slopes(a):
     rows = []
+    v2 = level_speed(a, 2)
     sim = make(a); run(sim, 1.0)
     sim.event({"name": "goto", "where": "ramp"}); run(sim, 1.0)
     sim.cmd.update(level=2, jy=1.0)
@@ -134,13 +139,13 @@ def t_slopes(a):
     for _ in range(100):
         t = run(sim, 0.1); amps.add(t)
         if 5.2 < body_x(sim, "frame") < 6.8: on_ramp.append(t["speed"])
-    rows.append(("пандус 1:12 вверх (2-я, 0,63 м/с)", (f"скорость на подъёме {min(on_ramp):.2f}…{max(on_ramp):.2f} м/с"
+    rows.append((f"пандус 1:12 вверх (2-я, {v2:.2f} м/с)", (f"скорость на подъёме {min(on_ramp):.2f}…{max(on_ramp):.2f} м/с"
                  if on_ramp else "не доехал") + amps.text()))
     sim = make(a); run(sim, 1.0)
     sim.event({"name": "goto", "where": "platform"}); run(sim, 0.5)
     sim.cmd.update(level=2, jy=1.0)
     vmax = max(run(sim, 0.1)["speed"] for _ in range(60))
-    rows.append(("спуск 1:8 (2-я, цель 0,63 м/с)", f"макс. {vmax:.2f} м/с"))
+    rows.append((f"спуск 1:8 (2-я, цель {v2:.2f} м/с)", f"макс. {vmax:.2f} м/с"))
     for deg in bh.HILLS:
         start, run_, rise = bh.HILL_LAYOUT[deg]
         sim = make(a); run(sim, 1.0)
@@ -156,6 +161,24 @@ def t_slopes(a):
         res = ("въехал" if top else f"не въехал (поднялся на {z:.2f} из {rise:.2f} м)") + amps.text()
         bad = [w for w in sorted(warns) if "упёрлось" in w or "ОПРОКИН" in w or "оторвалось" in w]
         rows.append((f"уклон {deg}° вверх (2-я)", res + (f" [{bad[0]}]" if bad else "")))
+    return rows
+
+
+def t_descent(a):
+    """Long slope (tilted gravity), 1st gear downhill forwards and backwards for 3 s, then let go of the joystick."""
+    rows, v1 = [], level_speed(a, 1)
+    for deg in (6, 10, 15):
+        res = []
+        for name, sign, jy in (("вперёд", 1, 1.0), ("задом", -1, -1.0)):
+            sim = make(a); sim.reset(y=-5.0); run(sim, 1.0)
+            sim.cmd["slope_fwd"] = sign * deg; run(sim, 1.0)
+            sim.cmd.update(level=1, jy=jy); run(sim, 3.0)
+            v = abs(sim.state["speed"])
+            sim.cmd.update(jy=0.0)
+            over = any(abs(run(sim, 0.03)["pitch"]) > 45 for _ in range(100))
+            held = v < v1 + 0.15
+            res.append(f"{name} {v:.2f} м/с" + ("" if held else " — разгоняется") + (", отпустил: ОПРОКИНУЛОСЬ" if over else ""))
+        rows.append((f"спуск {deg}° на 1-й (задано {v1:.2f} м/с)", "; ".join(res)))
     return rows
 
 
@@ -193,7 +216,7 @@ def t_tip(a):
 
 
 TESTS = dict(loads=t_loads, lift=t_lift, speed=t_speed, turn=t_turn, curb=t_obstacles, slope=t_slopes,
-             park=t_park, tip=t_tip)
+             descent=t_descent, park=t_park, tip=t_tip)
 
 
 def main():

@@ -7,7 +7,7 @@ Layout from the product photos: two blue side tubes with cross tubes, motors alo
 right-angle gearboxes in front of the rear axle, battery bag with a luggage rack behind the backrest,
 actuator leaning forward from the rear of the base to the middle of the seat, thick seat cushion with
 grey lateral hip pads, mesh backrest with push handles, armrests (joystick on the right), legrest
-with a shin pad and a one-piece footplate with two small anti-tip rollers.
+with a shin pad and a one-piece footplate; rear anti-tip wheels.
 
 The seat pivot sits at the front of the seat at knee height on two posts; the backrest is kept
 vertical by a parallelogram (lower link). Body, joint and site names match the CAD-based model so the
@@ -37,7 +37,6 @@ FRONT_X, FRONT_Y = 0.90, WHEEL_TRACK / 2   # caster axles (trailing), same track
 CASTER_R, CASTER_HW, CASTER_KG = 0.10, 0.025, 1.0   # 200 x 50 mm caster wheel
 HEAD_X = FRONT_X + 0.045             # caster head tubes (swivel axes) at the front ends of the side tubes
 LEGREST_X = 0.745                    # legrest hangs from the side tubes here, independent of the caster position
-FOOTROLLER_R, FOOTROLLER_GAP = 0.028, 0.035   # rollers clear a 30 mm threshold
 
 BLUE = "0.13 0.22 0.58 1"
 BLACK = "0.07 0.07 0.08 1"
@@ -290,7 +289,7 @@ def fit_cushion(seat, dz):
 
 
 def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame_mat="steel"):
-    """Legrest frame from the front cross tube, shin pad, one-piece footplate, two anti-tip rollers."""
+    """Legrest frame from the front cross tube, shin pad, one-piece footplate."""
     T = Tubes(frame)
     top = (LEGREST_X, 0.205, 0.33)
     bot = (heel_x + 0.03, 0.19, sole_z - 0.025)          # cross tube under the footplate, not under the heels
@@ -300,17 +299,7 @@ def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame
     x0, x1 = heel_x - 0.07, toe_x + 0.03
     ET.SubElement(frame, "geom", name="footplate", type="box", pos=f((x0 + x1) / 2, 0, sole_z - 0.006),
                   size=f((x1 - x0) / 2, 0.19, 0.006), rgba="0.12 0.12 0.13 1", **VIS)
-    # anti-tip rollers under the front of the footplate
-    rz = FOOTROLLER_R + FOOTROLLER_GAP
-    for side, s in (("left", 1), ("right", -1)):
-        T.add((x1 - 0.01, s * 0.16, sole_z - 0.01), (x1 - 0.01, s * 0.16, rz), 16, rgba=BLACK)
-        wb = ET.SubElement(frame, "body", name=f"footroller_{side}", pos=f(x1 - 0.01, s * 0.16, rz))
-        ET.SubElement(wb, "joint", name=f"footroller_{side}_spin", axis="0 1 0", damping="0.005")
-        ET.SubElement(wb, "inertial", mass="0.1", pos="0 0 0", diaginertia="0.00003 0.00004 0.00003")
-        ET.SubElement(wb, "geom", name=f"footroller_{side}_contact", type="sphere", size=f(FOOTROLLER_R),
-                      rgba="0 0 0 0", contype="1", conaffinity="2", group="3")
-        ET.SubElement(wb, "geom", type="cylinder", size=f(FOOTROLLER_R, 0.012), quat="0.7071067812 0.7071067812 0 0",
-                      rgba="0.2 0.2 0.22 1", **VIS)
+    # no anti-tip rollers under the footplate: with the casters 0.9 m ahead they never touch (see bench)
     # shin pad in front of the shins (holds the legs when standing)
     k, a = np.asarray(knee, float), np.asarray(ankle, float)
     axis = (a - k) / np.linalg.norm(a - k)
@@ -327,7 +316,7 @@ def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame
         T.add((c[0] + 0.03, s * (hw + 0.08), c[2]), (top[0] + (c[2] - top[2]) / (bot[2] - top[2]) * (bot[0] - top[0]),
                                                    s * 0.19, c[2]), 14, rgba=BLACK)
     rho = 7.85 if frame_mat == "steel" else 2.70
-    return T.mass(rho) + 1.4, ((x0 + x1) / 2, 0, sole_z)      # tubes + plate, pad and rollers
+    return T.mass(rho) + 1.2, ((x0 + x1) / 2, 0, sole_z)      # tubes + plate and pad
 
 
 def finish_frame(frame, extra_parts):

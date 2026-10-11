@@ -3,7 +3,7 @@
     python simulator.py              everything in one browser page (video + control panel)
     mjpython simulator.py --viewer   separate MuJoCo window + panel (old mode)
 
-The page (http://127.0.0.1:8765) shows the simulation video with the joystick, seat
+The page (http://127.0.0.1:8790) shows the simulation video with the joystick, seat
 up/down, brake, emergency stop, speed level, person/chair settings, floor slope, pushes,
 the test track, live telemetry and plots.
 """
@@ -16,10 +16,9 @@ import build_human as bh
 
 HERE = pathlib.Path(__file__).resolve().parent
 MODEL = HERE / "chair_human.xml"
-PORT = 8765
+PORT = 8790
 
-WHEELS = ["drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right",
-          "footroller_left", "footroller_right"]
+WHEELS = ["drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right"]
 TRACK = 0.525                     # m, drive wheel track
 BATTERY_V, BATTERY_AH = 25.6, 20.0
 ETA_CTRL = 0.95                   # PWM motor controller efficiency
@@ -137,7 +136,7 @@ class Telemetry:
         # the chair really falls over only when the CoM passes them
         touching = {self.wheel_geom.get(c.geom1) for c in d.contact[:d.ncon]} | {self.wheel_geom.get(c.geom2) for c in d.contact[:d.ncon]}
         extra = [d.geom_xpos[gid] + float(m.geom_size[gid][0]) * g for gid, w in self.wheel_geom.items()
-                 if w.startswith(("antitip", "footroller")) and w not in touching]
+                 if w.startswith("antitip") and w not in touching]
         t["lean_fwd"], t["lean_back"] = t["tip_fwd"], t["tip_back"]
         if extra and len(pts) >= 3:
             st = self._stability(com, pts + extra, g, R, p0)
@@ -342,7 +341,7 @@ class Sim:
         self.locked = False
         self.fast_target = None
         self.v_cmd = self.w_cmd = 0.0
-        self.stall_time = 0.0
+        self.stall_time = self.runaway_time = 0.0
         self.history.clear()
         self.energy_Wh = 0.0
 
@@ -389,6 +388,9 @@ class Sim:
         # stuck: commanded to drive straight on, but the chair stands still (obstacle, slope)
         stalled = abs(self.v_cmd) > 0.05 and abs(self.w_cmd) < 0.3 and not hard_stop and speed < 0.25 * abs(self.v_cmd)
         self.stall_time = self.stall_time + dt if stalled else 0.0
+        # runaway: rolling faster than commanded (downhill), the motors cannot hold the chair back
+        runaway = abs(t.get("speed", 0.0)) > abs(self.v_cmd) + 0.15 and not c["estop"]
+        self.runaway_time = self.runaway_time + dt if runaway else 0.0
         neutral = (v_t == 0 and w_t == 0 and abs(self.v_cmd) < 0.02 and abs(self.w_cmd) < 0.05)
         self.neutral_since = self.neutral_since + dt if neutral else 0.0
         em_brake = c["estop"] or c["park"] or self.neutral_since > 0.3
@@ -460,7 +462,8 @@ class Sim:
         elif c["park"]:
             msg = "Стояночный тормоз включён"
         self.status = dict(em_brake=bool(em_brake), lift_dir=lift, vmax=vmax, seat_limited=bool(seat_limited),
-                           stuck=self.stall_time > STALL_TIME, v_cmd=self.v_cmd, msg=msg or self.msg)
+                           stuck=self.stall_time > STALL_TIME, runaway=self.runaway_time > 0.5, v_cmd=self.v_cmd,
+                           msg=msg or self.msg)
         # --- pushes ---
         d.xfrc_applied[self.frame] = 0
         R = d.xmat[self.frame].reshape(3, 3)
@@ -572,14 +575,15 @@ class Sim:
             hung = max(t["load_drive_left"], t["load_drive_right"]) < 1.0
             if hung and max(t["load_antitip_left"], t["load_antitip_right"]) > 1.0:
                 w.append("Кресло упёрлось: село на антиопрокидыватели, ведущие колёса в воздухе")
-            elif hung and max(t["load_footroller_left"], t["load_footroller_right"]) > 1.0:
-                w.append("Кресло упёрлось: легло на ролики подставки, ведущие колёса в воздухе")
             elif rim > 0.5 * abs(self.status["v_cmd"]):
                 w.append("Кресло упёрлось: ведущие колёса буксуют, не хватает сцепления")
             else:
                 w.append(f"Кресло упёрлось: моторам не хватает момента ({self._limit_text()})")
         elif self.d.time - self.sat_since > 1.5:     # at the limit for 1.5 s (normal starts are shorter)
             w.append(f"Моторы на пределе момента ({self._limit_text()})")
+        if self.status["runaway"]:
+            w.append(f"Моторы не удерживают кресло на спуске: {abs(t['speed']):.2f} м/с при заданных "
+                     f"{abs(self.status['v_cmd']):.2f} — резкая остановка может опрокинуть")
         if self.status["seat_limited"]:
             w.append(f"Сиденье поднято ({t['seat_angle']:.0f}°): скорость не выше {STANDING_SPEED:.2f} м/с — опусти сиденье (F)")
         Fmax = bh.ACTUATORS[self.act]["force"]
@@ -588,7 +592,7 @@ class Sim:
         for k, name in (("tip_fwd", "вперёд"), ("tip_back", "назад"), ("tip_side", "вбок")):
             if t[k] is not None and t[k] < 6:
                 w.append(f"Запас до опрокидывания {name} меньше 6°")
-        for k, name, sup in (("lean_fwd", "вперёд", "ролики подножки"), ("lean_back", "назад", "антиопрокидыватели")):
+        for k, name, sup in (("lean_back", "назад", "антиопрокидыватели"),):
             if t.get(k) is not None and t[k] < 4 and (t[k.replace("lean", "tip")] or 0) >= 6:
                 w.append(f"Кресло вот-вот ляжет {name} на {sup}")
         if abs(t["pitch"]) > 25 or abs(t["roll"]) > 25:

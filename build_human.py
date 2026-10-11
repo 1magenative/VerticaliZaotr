@@ -183,7 +183,7 @@ WHEEL_R = 0.16                   # m, 320 mm drive wheels
 #   n0 - no-load speed, rpm (motor)                ratio   - gearbox ratio
 #   eta - gearbox efficiency (assumed 0.8)         I0 / I  - no-load / rated current, A
 MOTORS = {
-    "N150": dict(name="Norton ZW9012L3A-S · 150 Вт", T=1.0, n_rated=1500, n0=2000, ratio=16.75, eta=0.8,
+    "N150": dict(name="Norton ZW9012L3A-S · 150 Вт", T=1.0, n_rated=1500, n0=2000, ratio=30.1, eta=0.8,
                  I0=1.5, I=9.0, mass=1.7, note="стоит сейчас · dcmotorfactory.com"),
     "N200": dict(name="Norton ZW9012L3A-S · 200 Вт", T=1.3, n_rated=1500, n0=2000, ratio=16.75, eta=0.8,
                  I0=2.0, I=11.0, mass=1.8, note="та же серия, мощнее · dcmotorfactory.com"),
@@ -229,7 +229,8 @@ ANTITIP_GAP = 0.035              # m, anti-tip wheels above the floor: clear in 
 TYRE_MU = 0.8                    # rubber / PU tyre on a hard floor
 TYRE_TORSION = 0.005             # m, spin friction of the contact patch
 ROLLING_CRR = 0.015              # rolling resistance coefficient (solid tyres on a hard floor)
-TYRE_SOLREF = "0.015 1"          # contact time constant: a few mm of tyre deflection instead of a rigid wheel
+TYRE_SOLREF = "0.03 1"           # soft tyre contact (Ivan): about a centimetre of deflection instead of a rigid wheel
+TYRE_SOLIMP = "0.8 0.95 0.001 0.5 2"
 DRIVE_KV = 1600.0                # N per m/s of rim speed error: controller speed loop, saturates at stall
 
 
@@ -352,6 +353,7 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
             g.set("condim", "6")
             g.set("friction", f(TYRE_MU, TYRE_TORSION, ROLLING_CRR * r))
             g.set("solref", TYRE_SOLREF)
+            g.set("solimp", TYRE_SOLIMP)
     # --- anti-tip wheels slightly above the floor ---
     for side in ("left", "right"):
         b = frame.find(f"body[@name='antitip_{side}']")
@@ -643,7 +645,6 @@ def build(mass=80.0, height=1.75, frame_mat=DEFAULT_FRAME, act=DEFAULT_ACTUATOR,
         apply_masses(root, frame, frame_mat, act, [fp_x, 0, sole_z - 0.008], M)
     add_test_track(root.find("worldbody"))
     wheels = ["drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right"]
-    wheels += [w for w in ("footroller_left", "footroller_right") if root.find(f".//body[@name='{w}']") is not None]
     for w in wheels:
         b = root.find(f".//body[@name='{w}']")
         r = float(b.find("geom").get("size").split()[0])
