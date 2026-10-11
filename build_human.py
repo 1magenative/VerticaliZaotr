@@ -215,10 +215,10 @@ def motor_profile(key=DEFAULT_MOTOR, params=None):
 
 WHEEL_TORQUE = motor_profile()["wheel_torque"]                 # 13.4 N*m for the current motor
 WHEEL_FORCE = WHEEL_TORQUE / WHEEL_R
-DEFAULT_PEAK = 2.0               # controller peak current, x rated, for PEAK_TIME s (typical power-chair controller)
+DEFAULT_PEAK = 3.0               # controller peak current, x rated, for PEAK_TIME s: needed for thresholds and 10 deg ramps
 CASTER_TRAIL = 0.045             # m, caster axle behind the swivel axis
 CASTER_KG, FORK_KG = 1.0, 0.3    # 200 mm caster wheel, fork with stem and bearing
-ANTITIP_GAP = 0.025              # m, anti-tip wheels lifted off the floor (they scrub in turns otherwise)
+ANTITIP_GAP = 0.035              # m, anti-tip wheels above the floor: clear in turns and at a 10 deg ramp transition
 # Tyres: one contact point per wheel, but with real grip, rolling resistance and a little compliance.
 TYRE_MU = 0.8                    # rubber / PU tyre on a hard floor
 TYRE_TORSION = 0.005             # m, spin friction of the contact patch

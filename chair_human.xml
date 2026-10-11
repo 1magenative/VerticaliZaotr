@@ -17,18 +17,18 @@
     <geom name="floor" type="plane" size="60 10 0.1" rgba="0.89 0.9 0.92 1" contype="2" conaffinity="1" />
     <body name="frame" pos="0 0 0.003">
       <freejoint name="chassis_free" />
-      <geom type="capsule" size="0.016" fromto="-0.16 0.21 0.37 0.745 0.22 0.33" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.016" fromto="-0.16 -0.21 0.37 0.745 -0.22 0.33" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.016" fromto="-0.16 0.21 0.37 0.945 0.22 0.33" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.016" fromto="-0.16 -0.21 0.37 0.945 -0.22 0.33" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.016" fromto="0 0.205 0.22 0.3 0.21 0.17" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.016" fromto="0 -0.205 0.22 0.3 -0.21 0.17" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.016" fromto="0.3 0.21 0.17 0.745 0.22 0.21" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.016" fromto="0.3 -0.21 0.17 0.745 -0.22 0.21" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.016" fromto="0.3 0.21 0.17 0.945 0.22 0.21" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.016" fromto="0.3 -0.21 0.17 0.945 -0.22 0.21" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.016" fromto="-0.11 0.21 0.36 0 0.205 0.22" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.016" fromto="-0.11 -0.21 0.36 0 -0.205 0.22" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.019" fromto="0.745 0.22 0.2 0.745 0.22 0.345" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.019" fromto="0.745 -0.22 0.2 0.745 -0.22 0.345" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.0125" fromto="0.745 0.22 0.215 0.745 0.2625 0.215" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
-      <geom type="capsule" size="0.0125" fromto="0.745 -0.22 0.215 0.745 -0.2625 0.215" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.019" fromto="0.945 0.22 0.2 0.945 0.22 0.345" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.019" fromto="0.945 -0.22 0.2 0.945 -0.22 0.345" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.0125" fromto="0.945 0.22 0.215 0.945 0.2625 0.215" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
+      <geom type="capsule" size="0.0125" fromto="0.945 -0.22 0.215 0.945 -0.2625 0.215" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.0125" fromto="-0.14 -0.21 0.37 -0.14 0.21 0.37" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.0125" fromto="0 -0.205 0.22 0 0.205 0.22" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.0125" fromto="0.3 -0.21 0.17 0.3 0.21 0.17" rgba="0.13 0.22 0.58 1" contype="0" conaffinity="0" group="1" />
@@ -60,7 +60,7 @@
       <geom type="capsule" size="0.008" fromto="0.14 0.16 0.585 0.14 0.2 0.36" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.008" fromto="0.14 -0.16 0.585 0.14 -0.2 0.36" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom name="belly_guard" type="box" pos="0.30 0 0.17" size="0.12 0.18 0.012" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
-      <inertial mass="13.899" pos="0.344246 0 0.241999" diaginertia="0.164473 0.781637 0.756158" />
+      <inertial mass="14.8" pos="0.338509 0 0.243703" diaginertia="0.174145 0.798825 0.772682" />
       <body name="Motor150_Left">
         <inertial mass="1.7" pos="0.1 0.175 0.15" diaginertia="0.0015 0.006 0.006" />
         <geom type="box" pos="0 0.175 0.16" size="0.05 0.035 0.05" rgba="0.72 0.74 0.77 1" contype="0" conaffinity="0" group="1" />
@@ -197,7 +197,7 @@
         <geom type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
         <site name="drive_left_site" type="sphere" size="0.19" rgba="1 0 0 0.1" group="4" />
       </body>
-      <body name="antitip_left" pos="-0.2 0.17 0.065">
+      <body name="antitip_left" pos="-0.2 0.17 0.075">
         <joint name="antitip_left_spin" axis="0 1 0" damping="0.015" />
         <inertial mass="0.2" pos="0 0 0" diaginertia="8.96e-05 0.00016 8.96e-05" />
         <geom name="antitip_left_contact" type="sphere" size="0.04" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
@@ -213,7 +213,7 @@
         <geom type="cylinder" size="0.16 0.0425" quat="0.7071067812 0.7071067812 0 0" rgba="0.16 0.16 0.17 1" contype="0" conaffinity="0" group="1" mass="0" />
         <site name="drive_right_site" type="sphere" size="0.19" rgba="1 0 0 0.1" group="4" />
       </body>
-      <body name="antitip_right" pos="-0.2 -0.17 0.065">
+      <body name="antitip_right" pos="-0.2 -0.17 0.075">
         <joint name="antitip_right_spin" axis="0 1 0" damping="0.015" />
         <inertial mass="0.2" pos="0 0 0" diaginertia="8.96e-05 0.00016 8.96e-05" />
         <geom name="antitip_right_contact" type="sphere" size="0.04" rgba="0 0 0 0" contype="1" conaffinity="2" group="3" />
@@ -249,7 +249,7 @@
       <geom name="shin_pad" type="box" pos="0.815263 0 0.451387" size="0.03 0.17 0.116235" euler="0 -0.17 0" rgba="0.06 0.06 0.07 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.007" fromto="0.845263 0.17 0.451387 0.740211 0.19 0.451387" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
       <geom type="capsule" size="0.007" fromto="0.845263 -0.17 0.451387 0.740211 -0.19 0.451387" rgba="0.07 0.07 0.08 1" contype="0" conaffinity="0" group="1" />
-      <body name="front_fork_left" pos="0.745 0.2625 0.1">
+      <body name="front_fork_left" pos="0.945 0.2625 0.1">
         <joint name="front_left_swivel" axis="0 0 1" damping="0.05" armature="0.001" />
         <inertial mass="0.3" pos="-0.0225 0 0.06" diaginertia="0.0004 0.0004 0.0002" />
         <geom type="cylinder" size="0.011" fromto="0 0 0.12 0 0 0.21" rgba="0.1 0.1 0.12 1" contype="0" conaffinity="0" group="1" />
@@ -265,7 +265,7 @@
           <site name="front_left_site" type="sphere" size="0.13" rgba="1 0 0 0.1" group="4" />
         </body>
       </body>
-      <body name="front_fork_right" pos="0.745 -0.2625 0.1">
+      <body name="front_fork_right" pos="0.945 -0.2625 0.1">
         <joint name="front_right_swivel" axis="0 0 1" damping="0.05" armature="0.001" />
         <inertial mass="0.3" pos="-0.0225 0 0.06" diaginertia="0.0004 0.0004 0.0002" />
         <geom type="cylinder" size="0.011" fromto="0 0 0.12 0 0 0.21" rgba="0.1 0.1 0.12 1" contype="0" conaffinity="0" group="1" />

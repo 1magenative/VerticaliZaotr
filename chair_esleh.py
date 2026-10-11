@@ -32,9 +32,11 @@ GEOM = dict(
     FRAME_PIN=(0.24, 0.09),          # actuator pin on a bracket of the rear-lower cross tube
 )
 WHEEL_TRACK = 0.525
-FRONT_X, FRONT_Y = 0.70, WHEEL_TRACK / 2   # caster axles (trailing), same track as the drive wheels
+FRONT_X, FRONT_Y = 0.90, WHEEL_TRACK / 2   # caster axles (trailing), same track as the drive wheels;
+                                     # 20 cm ahead of ESLEH: less weight on the casters, they climb a 30 mm threshold
 CASTER_R, CASTER_HW, CASTER_KG = 0.10, 0.025, 1.0   # 200 x 50 mm caster wheel
-HEAD_X = FRONT_X + 0.045             # caster head tubes (swivel axes) / front cross tube
+HEAD_X = FRONT_X + 0.045             # caster head tubes (swivel axes) at the front ends of the side tubes
+LEGREST_X = 0.745                    # legrest hangs from the side tubes here, independent of the caster position
 FOOTROLLER_R, FOOTROLLER_GAP = 0.028, 0.035   # rollers clear a 30 mm threshold
 
 BLUE = "0.13 0.22 0.58 1"
@@ -290,7 +292,7 @@ def fit_cushion(seat, dz):
 def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame_mat="steel"):
     """Legrest frame from the front cross tube, shin pad, one-piece footplate, two anti-tip rollers."""
     T = Tubes(frame)
-    top = (HEAD_X, 0.205, 0.33)
+    top = (LEGREST_X, 0.205, 0.33)
     bot = (heel_x + 0.03, 0.19, sole_z - 0.025)          # cross tube under the footplate, not under the heels
     T.add(top, bot, 22, rgba=BLACK, mirror=True)
     T.add((bot[0], -0.19, bot[2]), (bot[0], 0.19, bot[2]), 20, rgba=BLACK)

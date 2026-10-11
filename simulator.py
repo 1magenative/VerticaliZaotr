@@ -558,7 +558,12 @@ class Sim:
             self.sat_since = self.d.time
         if self.status["stuck"]:
             rim = max(abs(t["rim_speed_left"]), abs(t["rim_speed_right"]))
-            if rim > 0.5 * abs(self.status["v_cmd"]):
+            hung = max(t["load_drive_left"], t["load_drive_right"]) < 1.0
+            if hung and max(t["load_antitip_left"], t["load_antitip_right"]) > 1.0:
+                w.append("Кресло упёрлось: село на антиопрокидыватели, ведущие колёса в воздухе")
+            elif hung and max(t["load_footroller_left"], t["load_footroller_right"]) > 1.0:
+                w.append("Кресло упёрлось: легло на ролики подставки, ведущие колёса в воздухе")
+            elif rim > 0.5 * abs(self.status["v_cmd"]):
                 w.append("Кресло упёрлось: ведущие колёса буксуют, не хватает сцепления")
             else:
                 w.append(f"Кресло упёрлось: моторам не хватает момента ({max(self.torque_limit):.1f} Н·м на колесе)")
