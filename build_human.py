@@ -183,7 +183,7 @@ WHEEL_R = 0.16                   # m, 320 mm drive wheels
 #   n0 - no-load speed, rpm (motor)                ratio   - gearbox ratio
 #   eta - gearbox efficiency (assumed 0.8)         I0 / I  - no-load / rated current, A
 MOTORS = {
-    "N150": dict(name="Norton ZW9012L3A-S · 150 Вт", T=1.0, n_rated=1500, n0=2000, ratio=16.75, eta=0.8,
+    "N150": dict(name="Norton ZW9012L3A-S · 150 Вт", T=1.0, n_rated=1500, n0=2000, ratio=30.1, eta=0.8,
                  I0=1.5, I=9.0, mass=1.7, note="стоит сейчас · dcmotorfactory.com"),
     "N200": dict(name="Norton ZW9012L3A-S · 200 Вт", T=1.3, n_rated=1500, n0=2000, ratio=16.75, eta=0.8,
                  I0=2.0, I=11.0, mass=1.8, note="та же серия, мощнее · dcmotorfactory.com"),
@@ -330,7 +330,7 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
         wb.set("pos", f(-CASTER_TRAIL, 0, 0))
         fork.append(wb)
     # --- tyres: one stable spherical contact point + visible cylinder ---
-    for w in ("drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right"):
+    for w in ("drive_left", "drive_right", "front_left", "front_right"):
         g = root.find(f".//geom[@name='{w}_contact']")
         r, hw_ = [float(x) for x in g.get("size").split()]
         body = root.find(f".//body[@name='{w}']")
@@ -338,16 +338,17 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
                       contype="0", conaffinity="0", group="1", mass="0")
         g.attrib.pop("quat", None)
         g.set("type", "sphere"); g.set("size", f(r)); g.set("rgba", "0 0 0 0"); g.set("group", "3")
+
+        # Более мягкий контакт шин
+        if w.startswith(("drive", "front")):
+            g.set("solref", "0.06 1")
+            g.set("solimp", "0.7 0.9 0.005 0.5 2")
         if w.startswith(("drive", "front")):
             # The higher priority makes this tyre value override the floor's generic
             # friction.  Low scrub friction is required for a fixed-wheel skid turn.
             g.set("priority", "1")
-            g.set("friction", "0.12 0.005 0.0001")
-    # --- anti-tip wheels slightly above the floor ---
-    for side in ("left", "right"):
-        b = frame.find(f"body[@name='antitip_{side}']")
-        p = np.array([float(x) for x in b.get("pos").split()]); p[2] += ANTITIP_GAP
-        b.set("pos", f(p))
+            g.set("friction", "0.5 0.005 0.0001")
+    # Auxiliary rear wheels removed from the ESLEH model.
 
 
 def _shift(el, d):
@@ -608,9 +609,21 @@ def build(mass=80.0, height=1.75, frame_mat=DEFAULT_FRAME, act=DEFAULT_ACTUATOR,
         move_battery_to_rack(root, frame)
         apply_hardware(root, frame, seat, act, M, G, chair)
         apply_masses(root, frame, frame_mat, act, [fp_x, 0, sole_z - 0.008], M)
+    # Удаляем дополнительные колёса вместе с их телами
+    EXTRA_WHEELS = (
+        "antitip_left",
+        "antitip_right",
+        "footroller_left",
+        "footroller_right",
+    )
+
+    for name in EXTRA_WHEELS:
+        for parent in root.iter():
+            for child in list(parent):
+                if child.tag == "body" and child.get("name") == name:
+                    parent.remove(child)
     add_test_track(root.find("worldbody"))
-    wheels = ["drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right"]
-    wheels += [w for w in ("footroller_left", "footroller_right") if root.find(f".//body[@name='{w}']") is not None]
+    wheels = ["drive_left", "drive_right", "front_left", "front_right"]
     for w in wheels:
         b = root.find(f".//body[@name='{w}']")
         r = float(b.find("geom").get("size").split()[0])

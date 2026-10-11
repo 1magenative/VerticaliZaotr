@@ -7,7 +7,7 @@ Layout from the product photos: two blue side tubes with cross tubes, motors alo
 right-angle gearboxes in front of the rear axle, battery bag with a luggage rack behind the backrest,
 actuator leaning forward from the rear of the base to the middle of the seat, thick seat cushion with
 grey lateral hip pads, mesh backrest with push handles, armrests (joystick on the right), legrest
-with a shin pad and a one-piece footplate with two small anti-tip rollers.
+with a shin pad and a one-piece footplate with no auxiliary rollers.
 
 The seat pivot sits at the front of the seat at knee height on two posts; the backrest is kept
 vertical by a parallelogram (lower link). Body, joint and site names match the CAD-based model so the
@@ -126,8 +126,7 @@ def base_tree(frame_mat="steel", motor_mass=1.7, act_mass=4.0):
         for s_ in (1, -1):
             ET.SubElement(fr, "geom", type="cylinder", size="0.012", fromto=f(px, s_ * 0.235, z_, px, s_ * 0.295, z_),
                           rgba=SILVER, **VIS)
-    # anti-tip ("anti-reverse") arms at the rear
-    T.add((-0.11, 0.18, 0.30), (-0.20, 0.17, 0.08), 20, rgba=BLACK, mirror=True)
+    # Rear anti-tip mounting arms removed.
     # luggage rack around the battery bag
     xa, xb, yr, zt = -0.15, 0.14, 0.16, 0.585
     T.poly([(xa, yr, zt), (xb, yr, zt)], 16, rgba=BLACK, mirror=True)
@@ -256,7 +255,6 @@ def base_tree(frame_mat="steel", motor_mass=1.7, act_mass=4.0):
     for side, s in (("left", 1), ("right", -1)):
         wheel(f"drive_{side}", (0, s * WHEEL_TRACK / 2, 0.16), 0.16, 0.0425, 3.0, 0.105)
         wheel(f"front_{side}", (FRONT_X, s * FRONT_Y, 0.16), 0.16, 0.0425, 3.0, 0.105)
-        wheel(f"antitip_{side}", (-0.20, s * 0.17, 0.04), 0.04, 0.012, 0.2, 0.025)
 
     ET.SubElement(root, "tendon")
     eq = ET.SubElement(root, "equality")
@@ -286,7 +284,7 @@ def fit_cushion(seat, dz):
 
 
 def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame_mat="steel"):
-    """Legrest frame from the front cross tube, shin pad, one-piece footplate, two anti-tip rollers."""
+    """Legrest frame from the front cross tube, shin pad, one-piece footplate, no auxiliary rollers."""
     T = Tubes(frame)
     top = (HEAD_X, 0.205, 0.33)
     bot = (heel_x + 0.03, 0.19, sole_z - 0.025)          # cross tube under the footplate, not under the heels
@@ -296,17 +294,7 @@ def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame
     x0, x1 = heel_x - 0.07, toe_x + 0.03
     ET.SubElement(frame, "geom", name="footplate", type="box", pos=f((x0 + x1) / 2, 0, sole_z - 0.006),
                   size=f((x1 - x0) / 2, 0.19, 0.006), rgba="0.12 0.12 0.13 1", **VIS)
-    # anti-tip rollers under the front of the footplate
-    rz = FOOTROLLER_R + FOOTROLLER_GAP
-    for side, s in (("left", 1), ("right", -1)):
-        T.add((x1 - 0.01, s * 0.16, sole_z - 0.01), (x1 - 0.01, s * 0.16, rz), 16, rgba=BLACK)
-        wb = ET.SubElement(frame, "body", name=f"footroller_{side}", pos=f(x1 - 0.01, s * 0.16, rz))
-        ET.SubElement(wb, "joint", name=f"footroller_{side}_spin", axis="0 1 0", damping="0.005")
-        ET.SubElement(wb, "inertial", mass="0.1", pos="0 0 0", diaginertia="0.00003 0.00004 0.00003")
-        ET.SubElement(wb, "geom", name=f"footroller_{side}_contact", type="sphere", size=f(FOOTROLLER_R),
-                      rgba="0 0 0 0", contype="1", conaffinity="2", group="3")
-        ET.SubElement(wb, "geom", type="cylinder", size=f(FOOTROLLER_R, 0.012), quat="0.7071067812 0.7071067812 0 0",
-                      rgba="0.2 0.2 0.22 1", **VIS)
+    # Front footplate anti-tip rollers and their mounting struts removed.
     # shin pad in front of the shins (holds the legs when standing)
     k, a = np.asarray(knee, float), np.asarray(ankle, float)
     axis = (a - k) / np.linalg.norm(a - k)
@@ -323,7 +311,7 @@ def add_legrest(root, frame, sole_z, heel_x, toe_x, knee, ankle, hw, r_sh, frame
         T.add((c[0] + 0.03, s * (hw + 0.08), c[2]), (top[0] + (c[2] - top[2]) / (bot[2] - top[2]) * (bot[0] - top[0]),
                                                    s * 0.19, c[2]), 14, rgba=BLACK)
     rho = 7.85 if frame_mat == "steel" else 2.70
-    return T.mass(rho) + 1.4, ((x0 + x1) / 2, 0, sole_z)      # tubes + plate, pad and rollers
+    return T.mass(rho) + 1.2, ((x0 + x1) / 2, 0, sole_z)      # tubes + plate and pad (rollers removed)
 
 
 def finish_frame(frame, extra_parts):

@@ -16,10 +16,9 @@ import build_human as bh
 
 HERE = pathlib.Path(__file__).resolve().parent
 MODEL = HERE / "chair_human.xml"
-PORT = 8765
+PORT = 8790
 
-WHEELS = ["drive_left", "drive_right", "front_left", "front_right", "antitip_left", "antitip_right",
-          "footroller_left", "footroller_right"]
+WHEELS = ["drive_left", "drive_right", "front_left", "front_right"]
 TRACK = 0.525                     # m, drive wheel track
 BATTERY_V, BATTERY_AH = 25.6, 20.0
 ETA_DRIVE = 0.8
@@ -32,9 +31,9 @@ PEAK_RECOVERY = 0.25              # peak budget refills at 1/4 of real time belo
 TURN_RATE = 1.6                   # rad/s at full joystick, scaled with level
 OBSTACLE_SPEED = 0.5 / 3.6        # m/s, automatic low-speed traction mode threshold
 OBSTACLE_STALL_TIME = 0.35        # s below 45% of command before traction mode starts
-OBSTACLE_TORQUE_MULT = 4.0        # short peak for quasi-static obstacle climbing
+OBSTACLE_TORQUE_MULT = 1        # short peak for quasi-static obstacle climbing
 OBSTACLE_KV = 1600.0              # strong low-speed velocity/current response
-ROAD_FRICTION, SKID_FRICTION = 0.8, 0.12
+ROAD_FRICTION, SKID_FRICTION = 0.5, 0.5
 SKID_YAW_GAIN = 180.0            # N*m per rad/s error; represents lateral track/tyre forces
 SKID_YAW_TORQUE = 250.0          # N*m cap for the simplified skid-steer contact model
 ACCEL, DECEL, EBRAKE_DECEL = 0.6, 1.0, 2.5   # m/s^2
@@ -260,6 +259,20 @@ class Sim:
         self.torque_limit = [self.mp["wheel_torque"]] * 2
         self._write_model()
         self.m = mujoco.MjModel.from_xml_path(str(MODEL))
+        for wheel in WHEELS:
+            geom_name = f"{wheel}_contact"
+
+            gid = mujoco.mj_name2id(
+                self.m,
+                mujoco.mjtObj.mjOBJ_GEOM,
+                geom_name
+            )
+
+            if gid >= 0:
+                self.m.geom_solref[gid] = [0.03, 1.0]
+                self.m.geom_solimp[gid] = [
+                    0.8, 0.95, 0.001, 0.5, 2.0
+                ]
         self.d = mujoco.MjData(self.m)
         self.tel = Telemetry(self.m)
         self._ids()
