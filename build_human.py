@@ -148,7 +148,7 @@ def part_masses(frame_mat, act, motor=None):
         "lower_link": 1.75,                                        # 2 steel links, 223 cm3
         "actuator_cylinder": a["mass"] * 0.7, "actuator_rod": a["mass"] * 0.3,
         "drive_left": 3.0, "drive_right": 3.0,                     # 320 mm solid tyre, Al rim, hub
-        "front_left": 3.0, "front_right": 3.0,                     # same 320 mm wheel as at the rear
+        "front_left": CASTER_KG, "front_right": CASTER_KG,         # 200 mm caster wheel (fork added separately)
         "antitip_left": 0.2, "antitip_right": 0.2,
     }
 
@@ -215,12 +215,20 @@ def motor_profile(key=DEFAULT_MOTOR, params=None):
 
 WHEEL_TORQUE = motor_profile()["wheel_torque"]                 # 13.4 N*m for the current motor
 WHEEL_FORCE = WHEEL_TORQUE / WHEEL_R
-CASTER_TRAIL = 0.045             # m, retained fork offset from the original caster layout
+DEFAULT_PEAK = 2.0               # controller peak current, x rated, for PEAK_TIME s (typical power-chair controller)
+CASTER_TRAIL = 0.045             # m, caster axle behind the swivel axis
+CASTER_KG, FORK_KG = 1.0, 0.3    # 200 mm caster wheel, fork with stem and bearing
 ANTITIP_GAP = 0.025              # m, anti-tip wheels lifted off the floor (they scrub in turns otherwise)
+# Tyres: one contact point per wheel, but with real grip, rolling resistance and a little compliance.
+TYRE_MU = 0.8                    # rubber / PU tyre on a hard floor
+TYRE_TORSION = 0.005             # m, spin friction of the contact patch
+ROLLING_CRR = 0.015              # rolling resistance coefficient (solid tyres on a hard floor)
+TYRE_SOLREF = "0.015 1"          # contact time constant: a few mm of tyre deflection instead of a rigid wheel
+DRIVE_KV = 1600.0                # N per m/s of rim speed error: controller speed loop, saturates at stall
 
 
 def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, chair="v5"):
-    """Actuator geometry/speed/force, motor limits, fixed four-wheel drive, brakes."""
+    """Actuator geometry/speed/force, motor limits, rear-wheel drive, front swivel casters, brakes."""
     world = root.find("worldbody")
     A = ACTUATORS[act]
     M = motor or motor_profile()
@@ -233,7 +241,9 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
     if glob is None:
         glob = ET.SubElement(vis, "global")
     glob.set("offwidth", "1920"); glob.set("offheight", "1200")     # video in the control panel
-    root.find("option").set("noslip_iterations", "4")      # no creeping of locked tyres on slopes
+    # elliptic friction cones: with pyramidal ones braked tyres creep down a slope (~4-8 mm/s), noslip does not help
+    root.find("option").set("cone", "elliptic")
+    root.find("option").set("noslip_iterations", "4")
     # --- actuator geometry ---
     seat.find("site[@name='seat_actuator_tip']").set("pos", f(pin_l[0], 0, pin_l[1]))
     seat_pos = np.array([float(v) for v in seat.get("pos").split()])
@@ -286,47 +296,38 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
                   kp=f(1e7 / gear ** 2), kv=f(2e5 / gear ** 2), ctrlrange="-1 1",
                   actrange=f(0, ACT_STROKE * gear),
                   forcerange=f(-A["force"] / gear, A["force"] / gear))
-    # Four-wheel skid steering.  Each physical side motor drives both wheels on its
-    # side, so its available rim force is split between the front and rear wheel.
-    # Keeping the sum unchanged avoids inventing twice the motor power/torque.
+    # Rear-wheel drive: one motor per drive wheel, speed-controlled up to the motor torque limit
+    # (the simulator updates forcerange every step from the current limit and back-EMF).
     for side in ("left", "right"):
         ET.SubElement(acts, "velocity", name=f"drive_{side}", joint=f"drive_{side}_spin", gear=f(WHEEL_R),
-                      kv="400", ctrlrange=f(-M["v0"], M["v0"]),
-                      forcerange=f(-wheel_force / 2, wheel_force / 2))
-        ET.SubElement(acts, "velocity", name=f"drive_front_{side}", joint=f"front_{side}_spin", gear=f(WHEEL_R),
-                      kv="400", ctrlrange=f(-M["v0"], M["v0"]),
-                      forcerange=f(-wheel_force / 2, wheel_force / 2))
-    # Electromagnetic parking brakes lock all four driven wheels.
-    for axle, prefix in (("rear", "drive"), ("front", "front")):
-        for side in ("left", "right"):
-            name = f"brake_lock_{side}" if axle == "rear" else f"brake_lock_front_{side}"
-            ET.SubElement(root.find("equality"), "joint", name=name, joint1=f"{prefix}_{side}_spin",
-                          polycoef="0 0 0 0 0", active="false", solref="0.004 1")
-            brake = f"brake_{side}" if axle == "rear" else f"brake_front_{side}"
-            ET.SubElement(acts, "damper", name=brake, joint=f"{prefix}_{side}_spin", kv="60", ctrlrange="0 1")
+                      kv=f(DRIVE_KV), ctrlrange=f(-M["v0"], M["v0"]),
+                      forcerange=f(-wheel_force, wheel_force))
+    # Electromagnetic parking brakes in the drive motors; the casters roll freely.
+    for side in ("left", "right"):
+        ET.SubElement(root.find("equality"), "joint", name=f"brake_lock_{side}", joint1=f"drive_{side}_spin",
+                      polycoef="0 0 0 0 0", active="false", solref="0.004 1")
+        ET.SubElement(acts, "damper", name=f"brake_{side}", joint=f"drive_{side}_spin", kv="60", ctrlrange="0 1")
 
-    # --- fixed powered front forks for true four-wheel skid/tank steering ---
+    # --- front swivel casters: fork turns about a vertical axis, the wheel trails behind it ---
     for side in ("left", "right"):
         wb = frame.find(f"body[@name='front_{side}']")
-        pos = np.array([float(x) for x in wb.get("pos").split()])
-        pos[1] = math.copysign(ce.WHEEL_TRACK / 2, pos[1])
-        pos[2] = WHEEL_R
         contact = wb.find(f"geom[@name='front_{side}_contact']")
-        contact.set("size", f"{WHEEL_R} 0.0425")
-        rear_inertial = frame.find(f"body[@name='drive_{side}']/inertial")
-        front_inertial = wb.find("inertial")
-        front_inertial.attrib.update(rear_inertial.attrib)
-        hub = next((g for g in wb.findall("geom") if g is not contact), None)
-        if hub is not None and hub.get("type") == "cylinder":
-            hub.set("size", "0.105 0.0455")
+        r, hw_ = [float(x) for x in contact.get("size").split()]
+        pos = np.array([float(x) for x in wb.get("pos").split()])
+        pos[2] = r
         frame.remove(wb)
         fork = ET.SubElement(frame, "body", name=f"front_fork_{side}", pos=f(pos + [CASTER_TRAIL, 0, 0]))
-        ET.SubElement(fork, "inertial", mass="0.3", pos=f(-CASTER_TRAIL / 2, 0, 0.04), diaginertia="0.0004 0.0004 0.0002")
-        ET.SubElement(fork, "geom", type="box", size=f(CASTER_TRAIL / 2 + 0.01, 0.03, 0.006), pos=f(-CASTER_TRAIL / 2, 0, 0.115),
-                      rgba="0.1 0.1 0.12 1", contype="0", conaffinity="0", group="1")
+        ET.SubElement(fork, "joint", name=f"front_{side}_swivel", axis="0 0 1", damping="0.05", armature="0.001")
+        ET.SubElement(fork, "inertial", mass=f(FORK_KG), pos=f(-CASTER_TRAIL / 2, 0, 0.6 * r),
+                      diaginertia="0.0004 0.0004 0.0002")
+        vis = dict(rgba="0.1 0.1 0.12 1", contype="0", conaffinity="0", group="1")
+        top = r + 0.02
+        ET.SubElement(fork, "geom", type="cylinder", size="0.011", fromto=f(0, 0, top, 0, 0, top + 0.09), **vis)   # stem
+        ET.SubElement(fork, "geom", type="box", size=f(CASTER_TRAIL / 2 + 0.012, hw_ + 0.012, 0.006),
+                      pos=f(-CASTER_TRAIL / 2, 0, top), **vis)
         for sgn in (1, -1):
-            ET.SubElement(fork, "geom", type="box", size=f(0.012, 0.004, 0.06), pos=f(-CASTER_TRAIL, sgn * 0.028, 0.055),
-                          rgba="0.1 0.1 0.12 1", contype="0", conaffinity="0", group="1")
+            ET.SubElement(fork, "geom", type="box", size=f(0.012, 0.004, top / 2),
+                          pos=f(-CASTER_TRAIL, sgn * (hw_ + 0.008), top / 2), **vis)
         wb.set("pos", f(-CASTER_TRAIL, 0, 0))
         fork.append(wb)
     # --- tyres: one stable spherical contact point + visible cylinder ---
@@ -339,10 +340,12 @@ def apply_hardware(root, frame, seat, act=DEFAULT_ACTUATOR, motor=None, G=None, 
         g.attrib.pop("quat", None)
         g.set("type", "sphere"); g.set("size", f(r)); g.set("rgba", "0 0 0 0"); g.set("group", "3")
         if w.startswith(("drive", "front")):
-            # The higher priority makes this tyre value override the floor's generic
-            # friction.  Low scrub friction is required for a fixed-wheel skid turn.
+            # Priority makes the tyre's own contact parameters win over the floor's.
+            # condim 6 adds rolling resistance (Crr * r, in metres) and contact-patch spin friction.
             g.set("priority", "1")
-            g.set("friction", "0.12 0.005 0.0001")
+            g.set("condim", "6")
+            g.set("friction", f(TYRE_MU, TYRE_TORSION, ROLLING_CRR * r))
+            g.set("solref", TYRE_SOLREF)
     # --- anti-tip wheels slightly above the floor ---
     for side in ("left", "right"):
         b = frame.find(f"body[@name='antitip_{side}']")
@@ -406,8 +409,33 @@ def move_battery_to_rack(root, frame):
             ET.SubElement(frame, "geom", fromto=f(x_, y_, zt, x_, y_, 0.17), **tube)
 
 
+# Test track along +x.  Each hill slope is 2 m long, so the whole chair (wheelbase 0.7 m) stands on it.
+HILLS = (6, 10, 15, 30)                       # deg
+HILL_SLOPE, HILL_PLATEAU, HILL_GAP, HILL_X0 = 2.0, 1.5, 3.0, 16.0
+CURB_50_X = 13.0
+
+
+def _hill_layout():
+    out, x = {}, HILL_X0
+    for deg in HILLS:
+        a = math.radians(deg)
+        out[deg] = (x, HILL_SLOPE * math.cos(a), HILL_SLOPE * math.sin(a))     # start, run, rise
+        x += 2 * HILL_SLOPE * math.cos(a) + HILL_PLATEAU + HILL_GAP
+    return out
+
+
+HILL_LAYOUT = _hill_layout()
+# "Move to" spots: chair origin (rear axle) x and z; the casters stand 1.5 m (curbs) or 0.6 m (hills) before the obstacle
+TRACK_SPOTS = {"start": (0.0, 0.0), "threshold": (0.3, 0.0), "ramp": (3.8, 0.0), "platform": (7.15, 2.0 / 12),
+               "curb50": (CURB_50_X - 2.2, 0.0)}
+TRACK_SPOTS.update({f"hill{deg}": (x - 1.3, 0.0) for deg, (x, _, _) in HILL_LAYOUT.items()})
+GROUND_GEOMS = ["floor", "threshold_30mm", "curb_50mm", "ramp_up_1_12", "ramp_down_1_8", "platform"]
+GROUND_GEOMS += [f"hill_{deg}_{part}" for deg in HILLS for part in ("up", "top", "down")]
+
+
 def add_test_track(world):
-    """Threshold, accessibility ramp and three separate 10/15/30 degree hills."""
+    """Threshold 30 mm, accessibility ramp 1:12 with a 1:8 descent, curb 50 mm and long 6/10/15/30 degree hills."""
+    world.find("geom[@name='floor']").set("size", "60 10 0.1")
     st = dict(contype="2", conaffinity="1", rgba="0.72 0.74 0.78 1", group="0")
 
     def slope_box(name, xa, xb, za, zb, width=1.2, rgba=None):
@@ -430,19 +458,18 @@ def add_test_track(world):
         slope_box(name, xa, xb, za, zb)
     ET.SubElement(world, "geom", name="platform", type="box", pos=f(x0 + 3.0, 0, h / 2), size=f(1.0, 1.2, h / 2), **st)
 
-    # Independent up-and-down obstacle hills along +x.  Their 0.1 m rise keeps a
-    # 0.5 km/h ascent inside the five-second automatic traction window.
-    hill_starts = {10: 12.5, 15: 20.5, 30: 26.5}
-    colours = {10: "0.35 0.65 0.38 1", 15: "0.88 0.65 0.22 1", 30: "0.82 0.32 0.25 1"}
-    height, plateau = 0.1, 0.8
-    for deg, start in hill_starts.items():
-        run = height / math.tan(math.radians(deg))
-        top0, top1, end = start + run, start + run + plateau, start + 2 * run + plateau
+    ET.SubElement(world, "geom", name="curb_50mm", type="box", pos=f(CURB_50_X + 0.1, 0, 0.025), size="0.1 1.2 0.025",
+                  rgba="0.85 0.55 0.2 1", contype="2", conaffinity="1")
+
+    # Up-and-down hills, each slope long enough for the whole chair to stand on it.
+    colours = {6: "0.45 0.62 0.80 1", 10: "0.35 0.65 0.38 1", 15: "0.88 0.65 0.22 1", 30: "0.82 0.32 0.25 1"}
+    for deg, (start, run, height) in HILL_LAYOUT.items():
+        top0, top1 = start + run, start + run + HILL_PLATEAU
         slope_box(f"hill_{deg}_up", start, top0, 0, height, rgba=colours[deg])
         ET.SubElement(world, "geom", name=f"hill_{deg}_top", type="box",
-                      pos=f((top0 + top1) / 2, 0, height / 2), size=f(plateau / 2, 1.2, height / 2),
+                      pos=f((top0 + top1) / 2, 0, height / 2), size=f(HILL_PLATEAU / 2, 1.2, height / 2),
                       rgba=colours[deg], contype="2", conaffinity="1", group="0")
-        slope_box(f"hill_{deg}_down", top1, end, height, 0, rgba=colours[deg])
+        slope_box(f"hill_{deg}_down", top1, top1 + run, height, 0, rgba=colours[deg])
 
 
 def build(mass=80.0, height=1.75, frame_mat=DEFAULT_FRAME, act=DEFAULT_ACTUATOR, motor=DEFAULT_MOTOR,

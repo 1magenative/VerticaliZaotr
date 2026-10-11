@@ -1,8 +1,8 @@
 """V6: standing power wheelchair modelled after the ESLEH Rester (esleh.com), built from primitives.
 
 Dimensions from the ESLEH datasheet: width 61 cm, height 107 cm, seat 46 x 44 cm, seat height 58 cm,
-back height 48 cm, track 52.5 cm and standing angle 75 deg.  This simulator variant uses four equal
-320 mm driven wheels instead of the original 200 mm front wheels.
+back height 48 cm, track 52.5 cm and standing angle 75 deg.  Rear-wheel drive with 320 mm wheels and
+200 mm swivel casters in front, as on the original.
 Layout from the product photos: two blue side tubes with cross tubes, motors along the chair on
 right-angle gearboxes in front of the rear axle, battery bag with a luggage rack behind the backrest,
 actuator leaning forward from the rear of the base to the middle of the seat, thick seat cushion with
@@ -32,8 +32,9 @@ GEOM = dict(
     FRAME_PIN=(0.24, 0.09),          # actuator pin on a bracket of the rear-lower cross tube
 )
 WHEEL_TRACK = 0.525
-FRONT_X, FRONT_Y = 0.70, WHEEL_TRACK / 2   # front axle, same track and wheels as at the rear
-HEAD_X = FRONT_X + 0.045             # caster head tubes / front cross tube
+FRONT_X, FRONT_Y = 0.70, WHEEL_TRACK / 2   # caster axles (trailing), same track as the drive wheels
+CASTER_R, CASTER_HW, CASTER_KG = 0.10, 0.025, 1.0   # 200 x 50 mm caster wheel
+HEAD_X = FRONT_X + 0.045             # caster head tubes (swivel axes) / front cross tube
 FOOTROLLER_R, FOOTROLLER_GAP = 0.028, 0.035   # rollers clear a 30 mm threshold
 
 BLUE = "0.13 0.22 0.58 1"
@@ -103,6 +104,7 @@ def base_tree(frame_mat="steel", motor_mass=1.7, act_mass=4.0):
     T.poly([(0.0, 0.205, 0.22), (0.30, 0.21, 0.17), (HEAD_X, 0.22, 0.21)], 32, mirror=True)   # lower bent tubes
     T.add((-0.11, 0.21, 0.36), (0.0, 0.205, 0.22), 32, mirror=True)                  # rear uprights
     T.add((HEAD_X, 0.22, 0.20), (HEAD_X, 0.22, 0.345), 38, rgba=BLUE, mirror=True)     # caster head tubes
+    T.add((HEAD_X, 0.22, 0.215), (HEAD_X, FRONT_Y, 0.215), 25, rgba=BLUE, mirror=True)  # brackets out to the caster stems
     T.add((-0.14, -0.21, 0.37), (-0.14, 0.21, 0.37), 25)                             # rear cross tube
     T.add((0.0, -0.205, 0.22), (0.0, 0.205, 0.22), 25)                               # motor cross tube
     T.add((0.30, -0.21, 0.17), (0.30, 0.21, 0.17), 25)                               # middle low cross tube
@@ -255,7 +257,7 @@ def base_tree(frame_mat="steel", motor_mass=1.7, act_mass=4.0):
                       rgba=SILVER, **VIS)
     for side, s in (("left", 1), ("right", -1)):
         wheel(f"drive_{side}", (0, s * WHEEL_TRACK / 2, 0.16), 0.16, 0.0425, 3.0, 0.105)
-        wheel(f"front_{side}", (FRONT_X, s * FRONT_Y, 0.16), 0.16, 0.0425, 3.0, 0.105)
+        wheel(f"front_{side}", (FRONT_X, s * FRONT_Y, CASTER_R), CASTER_R, CASTER_HW, CASTER_KG, 0.04)
         wheel(f"antitip_{side}", (-0.20, s * 0.17, 0.04), 0.04, 0.012, 0.2, 0.025)
 
     ET.SubElement(root, "tendon")
